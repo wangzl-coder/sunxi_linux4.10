@@ -49,8 +49,8 @@
 #include <dt-bindings/input/input.h>
 
 / {
-	model = "Olimex A33-OLinuXino";
-	compatible = "olimex,a33-olinuxino","allwinner,sun8i-a33";
+	model = "Vstar A33-astar-parrot";
+	compatible = "Vstar,a33-astar-parrot","allwinner,sun8i-a33";
 
 	aliases {
 		serial0 = &uart3;
@@ -60,20 +60,36 @@
 		stdout-path = "serial0:115200n8";
 	};
 
-	leds {
-		compatible = "gpio-leds";
-		pinctrl-names = "default";
-		pinctrl-0 = <&led_pin_olinuxino>;
-
-		green {
-			label = "a33-olinuxino:green:usr";
-			gpios = <&pio 1 7 GPIO_ACTIVE_HIGH>;
-		};
-	};
 };
 
 &ehci0 {
 	status = "okay";
+};
+
+&lradc {
+	vref-supply = <&reg_dcdc1>;
+	status = "okay";
+
+	button@200 {
+		label = "Volume Up";
+		linux,code = <KEY_VOLUMEUP>;
+		channel = <0>;
+		voltage = <191011>;
+	};
+
+	button@400 {
+		label = "Volume Down";
+		linux,code = <KEY_VOLUMEDOWN>;
+		channel = <0>;
+		voltage = <391304>;
+	};
+
+	button@600 {
+		label = "Home";
+		linux,code = <KEY_HOME>;
+		channel = <0>;
+		voltage = <600000>;
+	};
 };
 
 &mmc0 {
@@ -91,12 +107,6 @@
 };
 
 &pio {
-	led_pin_olinuxino: led_pins@0 {
-		allwinner,pins = "PB7";
-		allwinner,function = "gpio_out";
-		allwinner,drive = <SUN4I_PINCTRL_10_MA>;
-		allwinner,pull = <SUN4I_PINCTRL_NO_PULL>;
-	};
 
 	mmc0_cd_pin_olinuxino: mmc0_cd_pin@0 {
 		allwinner,pins = "PB4";

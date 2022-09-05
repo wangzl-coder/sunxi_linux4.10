@@ -60,74 +60,16 @@
 		stdout-path = "serial0:115200n8";
 	};
 
-};
-
-&ehci0 {
-	status = "okay";
-};
-
-&lradc {
-	vref-supply = <&reg_dcdc1>;
-	status = "okay";
-
-	button@200 {
-		label = "Volume Up";
-		linux,code = <KEY_VOLUMEUP>;
-		channel = <0>;
-		voltage = <191011>;
+/*
+	my_gp_test {
+		compatible = "wangzl,gp_read_test";
+		pinctrl-names = "default";
+		pinctrl-0 = <&my_read_pin>;
+		my_vcc-supply = <&reg_ldo_io1>;
+		rd-gpio = <&pio 7 2 GPIO_ACTIVE_HIGH>;	// PH2
 	};
+*/
 
-	button@400 {
-		label = "Volume Down";
-		linux,code = <KEY_VOLUMEDOWN>;
-		channel = <0>;
-		voltage = <391304>;
-	};
-
-	button@600 {
-		label = "Home";
-		linux,code = <KEY_HOME>;
-		channel = <0>;
-		voltage = <600000>;
-	};
-};
-
-&mmc0 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin_olinuxino>;
-	vmmc-supply = <&reg_dcdc1>;
-	bus-width = <4>;
-	cd-gpios = <&pio 1 4 GPIO_ACTIVE_HIGH>; /* PB4 */
-	cd-inverted;
-	status = "okay";
-};
-
-&ohci0 {
-	status = "okay";
-};
-
-&pio {
-
-	mmc0_cd_pin_olinuxino: mmc0_cd_pin@0 {
-		allwinner,pins = "PB4";
-		allwinner,function = "gpio_in";
-		allwinner,drive = <SUN4I_PINCTRL_10_MA>;
-		allwinner,pull = <SUN4I_PINCTRL_NO_PULL>;
-	};
-
-	usb0_id_detect_pin: usb0_id_detect_pin@0 {
-		allwinner,pins = "PB3";
-		allwinner,function = "gpio_in";
-		allwinner,drive = <SUN4I_PINCTRL_10_MA>;
-		allwinner,pull = <SUN4I_PINCTRL_NO_PULL>;
-	};
-
-	uart3_pins_b: uart3@1 {
-		allwinner,pins = "PH6","PH7";
-		allwinner,function = "uart3";
-		allwinner,drive = <SUN4I_PINCTRL_10_MA>;
-		allwinner,pull = <SUN4I_PINCTRL_NO_PULL>;
-	};
 };
 
 &r_rsb {
@@ -214,17 +156,76 @@
 	regulator-name = "vcc-rtc";
 };
 
+&reg_ldo_io1 {
+	regulator-name = "vcc-ctp";
+	regulator-min-microvolt = <3300000>;
+	regulator-max-microvolt = <3300000>;
+	status = "okay";
+};
+
+&pio {
+	mmc0_cd_pin_vstar: mmc0_cd_pin@0 {
+		allwinner,pins = "PB4";
+		allwinner,function = "gpio_in";
+		allwinner,drive = <SUN4I_PINCTRL_10_MA>;
+		allwinner,pull = <SUN4I_PINCTRL_NO_PULL>;
+	};
+
+	usb0_id_detect_pin: usb0_id_detect_pin@0 {
+		allwinner,pins = "PB3";
+		allwinner,function = "gpio_in";
+		allwinner,drive = <SUN4I_PINCTRL_10_MA>;
+		allwinner,pull = <SUN4I_PINCTRL_NO_PULL>;
+	};
+
+	uart3_pins_b: uart3@1 {
+		allwinner,pins = "PH6","PH7";
+		allwinner,function = "uart3";
+		allwinner,drive = <SUN4I_PINCTRL_10_MA>;
+		allwinner,pull = <SUN4I_PINCTRL_NO_PULL>;
+	};
+
+
+	ft5316_reset_pins: ft5316_reset_pin@0{
+		allwinner,pins = "PH1";
+		allwinner,function = "gpio_out";
+		allwinner,drive = <SUN4I_PINCTRL_10_MA>;
+		allwinner,pull = <SUN4I_PINCTRL_NO_PULL>;
+	};
+
+/*
+	my_read_pin: my_read_pin@0{
+		allwinner,pins = "PH2";
+		allwinner,function = "gpio_in";
+		allwinner,drive = <SUN4I_PINCTRL_10_MA>;
+		allwinner,pull = <SUN4I_PINCTRL_NO_PULL>;
+	};
+*/	
+
+};
+
+&ehci0 {
+	status = "okay";
+};
+
+&ohci0 {
+	status = "okay";
+};
+
+&mmc0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin_vstar>;
+	vmmc-supply = <&reg_dcdc1>;
+	bus-width = <4>;
+	cd-gpios = <&pio 1 4 GPIO_ACTIVE_HIGH>; /* PB4 */
+	cd-inverted;
+	status = "okay";
+};
+
+
 &simplefb_lcd {
 	vcc-lcd-supply = <&reg_dc1sw>;
 };
-
-/*
-&uart0 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&uart0_pins_b>;
-	status = "okay";
-};
-*/
 
 &usb_otg {
 	dr_mode = "otg";
@@ -248,4 +249,52 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&uart3_pins_b>;
 	status = "okay";
+};
+
+&i2c0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c0_pins_a>;
+	status = "okay";
+
+	vstar_ts: edt-ft5316@3a {
+		compatible = "edt,edt-ft5316";
+		reg = <0x3a>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&ft5316_reset_pins>;
+		interrupt-parent = <&pio>;
+		interrupts = <1 5 IRQ_TYPE_EDGE_FALLING>;	// PB5
+		reset-gpios = <&pio 7 1 GPIO_ACTIVE_HIGH>;	// PH1
+		vcc-ctp-supply = <&reg_ldo_io1>;
+		touchscreen-size-x = <1240>;
+		touchscreen-size-y = <600>;
+		//touchscreen-inverted-x = <0>;
+		//touchscreen-inverted-y = <0>;
+		//touchscreen-swapped-x-y = <1>;
+	};
+};
+
+&lradc {
+	vref-supply = <&reg_dcdc1>;
+	status = "okay";
+
+	button@200 {
+		label = "Volume Up";
+		linux,code = <KEY_VOLUMEUP>;
+		channel = <0>;
+		voltage = <191011>;
+	};
+
+	button@400 {
+		label = "Volume Down";
+		linux,code = <KEY_VOLUMEDOWN>;
+		channel = <0>;
+		voltage = <391304>;
+	};
+
+	button@600 {
+		label = "Home";
+		linux,code = <KEY_HOME>;
+		channel = <0>;
+		voltage = <600000>;
+	};
 };
